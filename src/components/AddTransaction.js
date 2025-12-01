@@ -191,4 +191,170 @@ const AddTransaction = () => {
               </label>
               <textarea
                 value={formData.description}
-                onChange={(e) => setFormData
+                onChange={(e) => setFormData({...formData, description: e.target.value})}
+                placeholder="Транзакция сипаттамасы..."
+                rows="2"
+                className="description-input"
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="form-section">
+          <div className="form-group">
+            <label>Тегтер</label>
+            <div className="tags-input">
+              <div className="tags-container">
+                {formData.tags.map(tag => (
+                  <span key={tag} className="tag">
+                    {tag}
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveTag(tag)}
+                      className="tag-remove"
+                    >
+                      ×
+                    </button>
+                  </span>
+                ))}
+              </div>
+              <div className="tag-input-wrapper">
+                <input
+                  type="text"
+                  value={tagInput}
+                  onChange={(e) => setTagInput(e.target.value)}
+                  placeholder="Тег қосу..."
+                  onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), handleAddTag())}
+                />
+                <button
+                  type="button"
+                  onClick={handleAddTag}
+                  className="tag-add-btn"
+                >
+                  Қосу
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="form-group">
+            <label className="checkbox-label">
+              <input
+                type="checkbox"
+                checked={isRecurring}
+                onChange={(e) => setIsRecurring(e.target.checked)}
+              />
+              <span>Қайталанатын транзакция</span>
+            </label>
+            
+            {isRecurring && (
+              <div className="recurring-settings">
+                <select
+                  value={recurringSettings.frequency}
+                  onChange={(e) => setRecurringSettings({...recurringSettings, frequency: e.target.value})}
+                >
+                  <option value="daily">Күнде</option>
+                  <option value="weekly">Апта сайын</option>
+                  <option value="monthly">Ай сайын</option>
+                  <option value="yearly">Жыл сайын</option>
+                </select>
+                
+                <input
+                  type="date"
+                  value={recurringSettings.endDate}
+                  onChange={(e) => setRecurringSettings({...recurringSettings, endDate: e.target.value})}
+                  placeholder="Аяқталу күні"
+                />
+                
+                <input
+                  type="number"
+                  min="1"
+                  value={recurringSettings.count}
+                  onChange={(e) => setRecurringSettings({...recurringSettings, count: parseInt(e.target.value)})}
+                  placeholder="Қайталану саны"
+                />
+              </div>
+            )}
+          </div>
+        </div>
+
+        <div className="form-actions">
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={() => {
+              setFormData({
+                type: 'expense',
+                category: '',
+                amount: '',
+                date: format(new Date(), 'yyyy-MM-dd'),
+                description: '',
+                tags: []
+              });
+            }}
+          >
+            Тазалау
+          </button>
+          
+          <button
+            type="submit"
+            className="btn btn-primary"
+            disabled={!formData.category || !formData.amount}
+          >
+            <FaPlus /> Транзакцияны қосу
+          </button>
+        </div>
+      </form>
+
+      <div className="quick-actions">
+        <h4>Жылдам әрекеттер:</h4>
+        <div className="quick-buttons">
+          <button
+            type="button"
+            className="quick-btn"
+            onClick={() => {
+              setFormData({
+                ...formData,
+                type: 'expense',
+                category: 'Тамақ',
+                amount: '5000'
+              });
+            }}
+          >
+            Тамақ (5,000 ₸)
+          </button>
+          <button
+            type="button"
+            className="quick-btn"
+            onClick={() => {
+              setFormData({
+                ...formData,
+                type: 'expense',
+                category: 'Көлік',
+                amount: '3000'
+              });
+            }}
+          >
+            Көлік (3,000 ₸)
+          </button>
+          <button
+            type="button"
+            className="quick-btn"
+            onClick={() => {
+              setFormData({
+                ...formData,
+                type: 'income',
+                category: 'Жалақы',
+                amount: '150000'
+              });
+            }}
+          >
+            Жалақы (150,000 ₸)
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default AddTransaction;
