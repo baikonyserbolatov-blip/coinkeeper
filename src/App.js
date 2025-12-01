@@ -1,71 +1,50 @@
-import React, { useEffect, useState } from "react";
-import Header from "./components/Header";
-import Summary from "./components/Summary";
-import AddTransactionForm from "./components/AddTransactionForm";
-import TransactionList from "./components/TransactionList";
-import ChartView from "./components/ChartView";
-import { loadTransactions, saveTransactions } from "./utils/storage";
+import React, { useState, useEffect, useContext } from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
+import { AuthContext } from './auth/AuthContext';
+import Header from './components/Header';
+import Sidebar from './components/Sidebar';
+import Dashboard from './pages/Dashboard';
+import Analytics from './pages/Analytics';
+import Budget from './pages/Budget';
+import SettingsPage from './pages/SettingsPage';
+import Login from './auth/Login';
+import Register from './auth/Register';
+import { TransactionProvider } from './utils/TransactionContext';
+import './styles.css';
 
 function App() {
-  const [transactions, setTransactions] = useState(() => loadTransactions());
-  const [limit, setLimit] = useState(() => {
-    const raw = localStorage.getItem("month_limit");
-    return raw ? Number(raw) : 0;
-  });
+  const { isAuthenticated } = useContext(AuthContext);
 
-  useEffect(() => {
-    saveTransactions(transactions);
-  }, [transactions]);
-
-  useEffect(() => {
-    localStorage.setItem("month_limit", String(limit || 0));
-  }, [limit]);
-
-  const addTransaction = (tx) => {
-    setTransactions((prev) => [tx, ...prev]);
-  };
-
-  const deleteTransaction = (id) => {
-    setTransactions((prev) => prev.filter((t) => t.id !== id));
-  };
-
-  const updateTransaction = (updated) => {
-    setTransactions((prev) => prev.map((t) => (t.id === updated.id ? updated : t)));
-  };
-
-  const incomes = transactions.filter((t) => t.type === "income").reduce((s, t) => s + t.amount, 0);
-  const expenses = transactions.filter((t) => t.type === "expense").reduce((s, t) => s + t.amount, 0);
-  const balance = incomes - expenses;
+  if (!isAuthenticated) {
+    return (
+      <div className="auth-container">
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/register" element={<Register />} />
+          <Route path="*" element={<Navigate to="/login" />} />
+        </Routes>
+      </div>
+    );
+  }
 
   return (
-    <div className="app">
-      <Header />
-      <main className="container">
-        <Summary
-          incomes={incomes}
-          expenses={expenses}
-          balance={balance}
-          limit={limit}
-          setLimit={setLimit}
-        />
-        <div className="main-grid">
-          <div className="left">
-            <AddTransactionForm onAdd={addTransaction} />
-            <TransactionList
-              transactions={transactions}
-              onDelete={deleteTransaction}
-              onUpdate={updateTransaction}
-            />
-          </div>
-          <div className="right">
-            <ChartView transactions={transactions} />
-          </div>
+    <TransactionProvider>
+      <div className="app">
+        <Header />
+        <div className="main-container">
+          <Sidebar />
+          <main className="main-content">
+            <Routes>
+              <Route path="/" element={<Dashboard />} />
+              <Route path="/analytics" element={<Analytics />} />
+              <Route path="/budget" element={<Budget />} />
+              <Route path="/settings" element={<SettingsPage />} />
+              <Route path="*" element={<Navigate to="/" />} />
+            </Routes>
+          </main>
         </div>
-      </main>
-      <footer className="footer">
-        Developed for course — Personal Finance Tracker (Lab)
-      </footer>
-    </div>
+      </div>
+    </TransactionProvider>
   );
 }
 
